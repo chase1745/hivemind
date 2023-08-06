@@ -3,11 +3,14 @@ pragma solidity 0.8.17;
 
 import "src/Hivemind.sol";
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/access/Ownable.sol";
+import "@hyperlane/IInterchainAccountRouter.sol";
 
 contract HivemindHyperlane is Ownable, Hivemind {
     mapping(address => bool) private incomingRouters;
     mapping(uint32 => address) private outgoingRouters;
+    mapping(uint32 => address) private remoteHiveminds;
+    uint32[] private enabledOutgoingDomains;
 
     constructor() {}
 
@@ -16,7 +19,19 @@ contract HivemindHyperlane is Ownable, Hivemind {
         _;
     }
 
-    function shareState() internal override {}
+    /////////// State Functions
+
+    function shareState(uint256 slot, bytes value) public override {
+        for (uint256 i = 0; i < enabledOutgoingDomains.length; i++) {
+            uint32 domain = enabledOutgoingDomains[i];
+            address routerAddress = outgoingRouters[domain];
+            address remoteHivemind = remoteHiveminds[domain];
+
+            IInterchainAccountRouter(routerAddress).dispatch(
+                domain, remoteHivemind, abi.encodeCall(this.updateState, (slot, value))
+            );
+        }
+    }
 
     /////////// Add/remote incoming/outgoing routers
 
@@ -24,15 +39,23 @@ contract HivemindHyperlane is Ownable, Hivemind {
         incomingRouters[newRouter] = true;
     }
 
-    function removeOutgoingRouter(address router) external onlyOwner {
+    function removeIncomingRouter(address router) external onlyOwner {
         delete incomingRouters[router];
     }
 
-    function addOutgoingRouter(uint32 domain, address router) external onlyOwner {
-        outgoingRouters[newRouter] = true;
+    function addOutgoingRouter(uint32 domain, address router, address remoteHivemind) external onlyOwner {
+        outgoingRouters[domain] = router;
+        remoteHiveminds[domain] = remoteHivemind;
+        enabledOutgoingDomains.push(domain);
     }
 
     function removeOutgoingRouter(uint32 domain) external onlyOwner {
         delete outgoingRouters[domain];
+        delete remoteHiveminds[domain];
+        for (uint256 i = 0; i < enabledOutgoingDomains.length; i++) {
+            if (enabledOutgoingDomains[i] == domain) {
+                enabledOutgoingDomains[i] = 0;
+            }
+        }
     }
 }
