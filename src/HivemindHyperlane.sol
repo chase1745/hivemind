@@ -7,12 +7,14 @@ import "@openzeppelin/access/Ownable.sol";
 import "@hyperlane/IInterchainAccountRouter.sol";
 
 contract HivemindHyperlane is Ownable, Hivemind {
-    mapping(address => bool) public incomingRouters;
-    mapping(uint32 => address) private outgoingRouters;
+    mapping(address => bool) private incomingRouters;
     mapping(uint32 => address) private remoteHiveminds;
+    address private localRouter;
     uint32[] private enabledOutgoingDomains;
 
-    constructor() {}
+    constructor(address _localRouter) {
+        localRouter = _localRouter;
+    }
 
     modifier onlyStateUpdaters() override {
         require(incomingRouters[msg.sender], "Unknown router cannot call");
@@ -21,16 +23,30 @@ contract HivemindHyperlane is Ownable, Hivemind {
 
     /////////// State Functions
 
-    function shareIncrementUint256(uint256 slot, uint256 amount) public override {
+    function shareIncrementUint256(uint256 slot, uint256 amount) internal override {
         for (uint256 i = 0; i < enabledOutgoingDomains.length; i++) {
             uint32 domain = enabledOutgoingDomains[i];
-            address routerAddress = outgoingRouters[domain];
             address remoteHivemind = remoteHiveminds[domain];
 
-            IInterchainAccountRouter(routerAddress).dispatch(
+            IInterchainAccountRouter(localRouter).dispatch(
                 domain, remoteHivemind, abi.encodeCall(this.incrementUint256, (slot, amount))
             );
         }
+    }
+
+    function shareDecrementUint256(uint256 slot, uint256 amount) internal override {
+        for (uint256 i = 0; i < enabledOutgoingDomains.length; i++) {
+            uint32 domain = enabledOutgoingDomains[i];
+            address remoteHivemind = remoteHiveminds[domain];
+
+            IInterchainAccountRouter(localRouter).dispatch(
+                domain, remoteHivemind, abi.encodeCall(this.decrementUint256, (slot, amount))
+            );
+        }
+    }
+
+    function getInterchainAccount(uint32 destDomain) public view returns (address) {
+        return IInterchainAccountRouter(localRouter).getRemoteInterchainAccount(destDomain, address(this));
     }
 
     /////////// Add/remote incoming/outgoing routers
@@ -43,14 +59,12 @@ contract HivemindHyperlane is Ownable, Hivemind {
         delete incomingRouters[router];
     }
 
-    function addOutgoingRouter(uint32 domain, address router, address remoteHivemind) external onlyOwner {
-        outgoingRouters[domain] = router;
+    function addOutgoingRouter(uint32 domain, address remoteHivemind) external onlyOwner {
         remoteHiveminds[domain] = remoteHivemind;
         enabledOutgoingDomains.push(domain);
     }
 
     function removeOutgoingRouter(uint32 domain) external onlyOwner {
-        delete outgoingRouters[domain];
         delete remoteHiveminds[domain];
         for (uint256 i = 0; i < enabledOutgoingDomains.length; i++) {
             if (enabledOutgoingDomains[i] == domain) {

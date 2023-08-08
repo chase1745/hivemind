@@ -7,12 +7,41 @@ import "src/HivemindHyperlane.sol";
 contract ExampleImpl is HivemindHyperlane {
     uint256 public a = 0;
 
-    function exampleUpdate() public {
+    constructor(address _localRouter) HivemindHyperlane(_localRouter) {}
+
+    function exampleInc() public {
         uint256 slot;
         assembly {
             slot := a.slot
         }
 
         this.incrementUint256(slot, 999);
+    }
+
+    function exampleDec() public {
+        uint256 slot;
+        assembly {
+            slot := a.slot
+        }
+
+        this.decrementUint256(slot, 999);
+    }
+
+    function exampleShareInc() public {
+        uint256 slot;
+        assembly {
+            slot := a.slot
+        }
+
+        super.shareIncrementUint256(slot, 1);
+    }
+
+    function exampleShareDec() public {
+        uint256 slot;
+        assembly {
+            slot := a.slot
+        }
+
+        super.shareDecrementUint256(slot, 1);
     }
 }

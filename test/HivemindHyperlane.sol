@@ -11,7 +11,7 @@ contract HivemindHyperlaneTest is Test {
     address defaultAddress = 0xc0ffee254729296a45a3885639AC7E10F9d54979;
 
     function setUp() public {
-        hivemind = new HivemindHyperlane();
+        hivemind = new HivemindHyperlane(defaultAddress);
     }
 
     //////// OnlyOwner tests
@@ -31,7 +31,7 @@ contract HivemindHyperlaneTest is Test {
     function testAddOutgoingRouterOnlyOwner() public {
         vm.startBroadcast();
         vm.expectRevert(abi.encodePacked("Ownable: caller is not the owner"));
-        hivemind.addOutgoingRouter(0, defaultAddress, defaultAddress);
+        hivemind.addOutgoingRouter(0, defaultAddress);
     }
 
     function testRemoveOutgoingRouterOnlyOwner() public {
