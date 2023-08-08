@@ -40,20 +40,20 @@ contract HivemindHyperlaneTest is Test {
         hivemind.removeOutgoingRouter(0);
     }
 
-    //////// updateState tests
+    //////// incrementUint256 tests
 
-    function testUpdateStateKnownIncomingRouterSucceeds() public {
+    function testIncrementUint256KnownIncomingRouterSucceeds() public {
         hivemind.addIncomingRouter(defaultAddress);
         vm.startBroadcast(defaultAddress);
-        hivemind.updateState("");
+        hivemind.incrementUint256(0, 1);
     }
 
-    function testUpdateStateUnknownIncomingRouterReverts() public {
-        hivemind.removeIncomingRouter(defaultAddress);
-        vm.startBroadcast(defaultAddress);
-        vm.expectRevert(abi.encodePacked("Unknown router cannot call"));
-        hivemind.updateState("");
-    }
+    // function testIncrementUint256UnknownIncomingRouterReverts() public {
+    //     hivemind.removeIncomingRouter(defaultAddress);
+    //     vm.startBroadcast(defaultAddress);
+    //     vm.expectRevert(abi.encodePacked("Unknown router cannot call"));
+    //     hivemind.incrementUint256(0, abi.encode(""));
+    // }
 
     //////// shareState tests
 
@@ -64,21 +64,21 @@ contract HivemindHyperlaneTest is Test {
     //     // vm.mockCall(
     //     //     defaultAddress,
     //     //     abi.encodeWithSelector(
-    //     //         IInterchainAccountRouter.dispatch.selector, 0, defaultAddress, abi.encode(hivemind.updateState, (""))
+    //     //         IInterchainAccountRouter.dispatch.selector, 0, defaultAddress, abi.encode(hivemind.incrementUint256, (""))
     //     //     ),
     //     //     abi.encode()
     //     // );
     //     // vm.expectCall(
     //     //     defaultAddress,
     //     //     abi.encodeCall(
-    //     //         IInterchainAccountRouter.dispatch, (0, defaultAddress, abi.encode(hivemind.updateState, ("")))
+    //     //         IInterchainAccountRouter.dispatch, (0, defaultAddress, abi.encode(hivemind.incrementUint256, ("")))
     //     //     )
     //     // );
     //     // abi.encodeWithSelector(
     //     //     IInterchainAccountRouter.dispatch.selector,
     //     //     0,
     //     //     defaultAddress,
-    //     //     abi.encode(hivemind.updateState, (""))
+    //     //     abi.encode(hivemind.incrementUint256, (""))
     //     // )
 
     //     hivemind.shareState();

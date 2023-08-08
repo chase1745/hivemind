@@ -7,7 +7,7 @@ import "@openzeppelin/access/Ownable.sol";
 import "@hyperlane/IInterchainAccountRouter.sol";
 
 contract HivemindHyperlane is Ownable, Hivemind {
-    mapping(address => bool) private incomingRouters;
+    mapping(address => bool) public incomingRouters;
     mapping(uint32 => address) private outgoingRouters;
     mapping(uint32 => address) private remoteHiveminds;
     uint32[] private enabledOutgoingDomains;
@@ -21,14 +21,14 @@ contract HivemindHyperlane is Ownable, Hivemind {
 
     /////////// State Functions
 
-    function shareState(uint256 slot, bytes value) public override {
+    function shareIncrementUint256(uint256 slot, uint256 amount) public override {
         for (uint256 i = 0; i < enabledOutgoingDomains.length; i++) {
             uint32 domain = enabledOutgoingDomains[i];
             address routerAddress = outgoingRouters[domain];
             address remoteHivemind = remoteHiveminds[domain];
 
             IInterchainAccountRouter(routerAddress).dispatch(
-                domain, remoteHivemind, abi.encodeCall(this.updateState, (slot, value))
+                domain, remoteHivemind, abi.encodeCall(this.incrementUint256, (slot, amount))
             );
         }
     }

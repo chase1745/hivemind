@@ -1,2 +1,6 @@
-SampleContractTest:testFunc1() (gas: 534472)
-SampleContractTest:testFunc2() (gas: 534440)
+HivemindHyperlaneTest:testAddIncomingRouterOnlyOwner() (gas: 13424)
+HivemindHyperlaneTest:testAddOutgoingRouterOnlyOwner() (gas: 13652)
+HivemindHyperlaneTest:testRemoveIncomingRouterOnlyOwner() (gas: 13370)
+HivemindHyperlaneTest:testRemoveOutgoingRouterOnlyOwner() (gas: 11318)
+HivemindHyperlaneTest:testUpdateStateKnownIncomingRouterSucceeds() (gas: 39567)
+HivemindHyperlaneTest:testUpdateStateUnknownIncomingRouterReverts() (gas: 17461)
