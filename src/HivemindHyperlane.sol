@@ -28,8 +28,8 @@ contract HivemindHyperlane is Ownable, Hivemind {
             uint32 domain = enabledOutgoingDomains[i];
             address remoteHivemind = remoteHiveminds[domain];
 
-            IInterchainAccountRouter(localRouter).dispatch(
-                domain, remoteHivemind, abi.encodeCall(this.incrementUint256, (slot, amount))
+            IInterchainAccountRouter(localRouter).callRemote(
+                domain, remoteHivemind, 0, abi.encodeCall(this.incrementUint256, (slot, amount))
             );
         }
     }
@@ -39,8 +39,8 @@ contract HivemindHyperlane is Ownable, Hivemind {
             uint32 domain = enabledOutgoingDomains[i];
             address remoteHivemind = remoteHiveminds[domain];
 
-            IInterchainAccountRouter(localRouter).dispatch(
-                domain, remoteHivemind, abi.encodeCall(this.decrementUint256, (slot, amount))
+            IInterchainAccountRouter(localRouter).callRemote(
+                domain, remoteHivemind, 0, abi.encodeCall(this.decrementUint256, (slot, amount))
             );
         }
     }
